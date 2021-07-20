@@ -9,10 +9,10 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.factura_electronicaresolver.acme.httpchallenge=true"
-      - "--certificatesresolvers.factura_electronicaresolver.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.factura_electronicaresolver.acme.email=${LETSENCRYPT_EMAIL}"
-      - "--certificatesresolvers.factura_electronicaresolver.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.resolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.resolver.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.resolver.acme.email=${LETSENCRYPT_EMAIL}"
+      - "--certificatesresolvers.resolver.acme.storage=/letsencrypt/acme.json"
     labels:
       # enable traefik
       - "traefik.enable=true"
@@ -23,8 +23,8 @@ services:
       - cert-vol:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
-  factura_electronica-erpnext-nginx:
-    image: factura_electronica-erpnext-nginx:latest
+  -erpnext-nginx:
+    image: -erpnext-nginx:latest
     restart: on-failure
     environment:
       - FRAPPE_PY=erpnext-python
@@ -33,15 +33,15 @@ services:
       - SOCKETIO_PORT=9000
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.factura_electronica-erpnext-nginx.rule=Host(${SITES})"
+      - "traefik.http.routers.-erpnext-nginx.rule=Host(${SITES})"
       - "${ENTRYPOINT_LABEL}"
-      - "traefik.http.services.factura_electronica-erpnext-nginx.loadbalancer.server.port=80"
+      - "traefik.http.services.-erpnext-nginx.loadbalancer.server.port=80"
     volumes:
       - sites-vol:/var/www/html/sites:rw
       - assets-vol:/assets:rw
 
   erpnext-python:
-    image: factura_electronica-erpnext-worker:latest
+    image: -erpnext-worker:latest
     restart: on-failure
     environment:
       - MARIADB_HOST=${MARIADB_HOST}
@@ -62,8 +62,8 @@ services:
     volumes:
       - sites-vol:/home/frappe/frappe-bench/sites:rw
 
-  factura_electronica-erpnext-worker-default:
-    image: factura_electronica-erpnext-worker:latest
+  -erpnext-worker-default:
+    image: -erpnext-worker:latest
     restart: on-failure
     command: worker
     depends_on:
@@ -72,8 +72,8 @@ services:
     volumes:
       - sites-vol:/home/frappe/frappe-bench/sites:rw
 
-  factura_electronica-erpnext-worker-short:
-    image: factura_electronica-erpnext-worker:latest
+  -erpnext-worker-short:
+    image: -erpnext-worker:latest
     restart: on-failure
     command: worker
     environment:
@@ -84,8 +84,8 @@ services:
     volumes:
       - sites-vol:/home/frappe/frappe-bench/sites:rw
 
-  factura_electronica-erpnext-worker-long:
-    image: factura_electronica-erpnext-worker:latest
+  -erpnext-worker-long:
+    image: -erpnext-worker:latest
     restart: on-failure
     command: worker
     environment:
@@ -97,7 +97,7 @@ services:
       - sites-vol:/home/frappe/frappe-bench/sites:rw
 
   erpnext-schedule:
-    image: factura_electronica-erpnext-worker:latest
+    image: -erpnext-worker:latest
     restart: on-failure
     command: schedule
     depends_on:
@@ -134,7 +134,7 @@ services:
       - mariadb-vol:/var/lib/mysql
 
   site-creator:
-    image: factura_electronica-erpnext-worker:latest
+    image: -erpnext-worker:latest
     restart: "no"
     command: new
     depends_on:
